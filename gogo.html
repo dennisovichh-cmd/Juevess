@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DeporZone - Lab jQuery</title>
+    <script src="https://jquery.com"></script>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: linear-gradient(135deg, #1e5e3a, #0d331d); color: white; padding: 25px; border-radius: 12px; width: 320px; text-align: center; transition: 0.4s; }
+        .wally { background: linear-gradient(135deg, #b85c00, #5c2e00); }
+        .volei { background: linear-gradient(135deg, #104f55, #32746d); }
+        .futsal { background: linear-gradient(135deg, #1e5e3a, #0d331d); }
+        .btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px; margin: 5px; border-radius: 5px; cursor: pointer; }
+        .btn-action { background: #ffcc00; color: #111; font-weight: bold; width: 100%; margin-top: 10px; }
+        #details { background: rgba(0,0,0,0.4); padding: 10px; border-radius: 5px; margin: 10px 0; display: none; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .modal-content { background: white; color: #333; padding: 20px; border-radius: 8px; text-align: center; }
+        #timer { color: red; font-weight: bold; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="card futsal" id="box">
+        <h2 id="title">Zona Deportes Achumani</h2>
+        <div>
+            <button class="btn sport" data-type="futsal" data-txt="⚽ DeporZone Futsal" data-info="Cancha sintética LED e iluminación nocturna profesional.">⚽</button>
+            <button class="btn sport" data-type="wally" data-txt="🏐 DeporZone Wally" data-info="Cancha de wally reglamentaria con amortiguación.">🏐</button>
+            <button class="btn sport" data-type="volei" data-txt="🔵 DeporZone Voleibol" data-info="Piso pulido profesional ideal para campeonatos.">🔵</button>
+        </div>
+        <button class="btn btn-action" id="btnToggle">📌 Ver Detalles</button>
+        <div id="details">Cancha sintética LED e iluminación nocturna profesional.</div>
+
+        <!-- CALCULADOR (VIERNES) -->
+        <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 15px;">
+            <label>Horas: </label>
+            <input type="number" id="hours" value="1" min="1" style="width: 50px; text-align: center;">
+            <p>Total: <b id="total">40</b> BOB</p>
+            <button class="btn btn-action" id="btnOpen" style="background:#28a745; color:white;">Confirmar Reserva</button>
+        </div>
+    </div>
+
+    <!-- MODAL ASÍNCRONO (RETO VIERNES) -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3>¡Confirma tu Reserva!</h3>
+            <p>Tiempo disponible para concretar:</p>
+            <div id="timer">30s</div>
+            <button class="btn btn-action" onclick="alert('¡Reserva Exitosa!'); location.reload();">Aceptar</button>
+            <button class="btn" id="btnClose" style="color:#333; background:#ddd;">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let clock, timeLeft;
+
+            // JUEVES: Mostrar/Ocultar detalles
+            $("#btnToggle").click(function() { $("#details").slideToggle(); });
+
+            // RETO PRO JUEVES: Cambio de tema dinámico usando data attributes
+            $(".sport").click(function() {
+                let type = $(this).data("type");
+                $("#box").removeClass("futsal wally volei").addClass(type);
+                $("#title").text($(this).data("txt"));
+                $("#details").text($(this).data("info")).hide();
+            });
+
+            // VIERNES: Calculador en tiempo real
+            $("#hours").on("input change keyup", function() {
+                let h = $(this).val();
+                if (h < 1 || isNaN(h)) h = 1;
+                $("#total").text(h * 40);
+            });
+
+            // RETO PRO VIERNES: Modal y Temporizador Asíncrono
+            $("#btnOpen").click(function(e) {
+                e.preventDefault();
+                $("#modal").css("display", "flex").hide().fadeIn(300);
+                timeLeft = 30;
+                $("#timer").text(timeLeft + "s");
+                
+                clearInterval(clock);
+                clock = setInterval(function() {
+                    timeLeft--;
+                    $("#timer").text(timeLeft + "s");
+                    if(timeLeft <= 0) {
+                        clearInterval(clock);
+                        $("#modal").fadeOut(500, function() { alert("⚠️ Tiempo expirado."); });
+                    }
+                }, 1000);
+            });
+
+            $("#btnClose").click(function() { clearInterval(clock); $("#modal").fadeOut(300); });
+        });
+    </script>
+</body>
+</html>
